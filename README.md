@@ -303,5 +303,5 @@ Then, create a new notebook and use the Alluxio interpreter by running the follo
      
 ### Summary
 
-This git repo provides instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com
+This git repo provides instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com 
 
