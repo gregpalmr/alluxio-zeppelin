@@ -69,9 +69,9 @@ If you want to run the Zeppelin server in a Docker container or in a Kubernetes 
 
 Download the Docker build script named Dockerfile.zeppelin from this git repo. Either copy and paste the contents into a file on your computer, or use the following WGET or CURL command:
 
-     wget https://github.com/gregpalmr/alluxio-zeppelin/xxx/Dockerfile.zeppelin
+     wget https://raw.githubusercontent.com/gregpalmr/alluxio-zeppelin/main/Dockerfile.zeppelin
      
-     curl -O https://github.com/gregpalmr/alluxio-zeppelin/xxx/Dockerfile.zeppelin
+     curl -O https://raw.githubusercontent.com/gregpalmr/alluxio-zeppelin/main/Dockerfile.zeppelin
      
 ### Step 3. Build the Docker image
 
