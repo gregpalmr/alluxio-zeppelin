@@ -6,9 +6,9 @@
 #
 # USAGE:
 #        BUILD:
-#               docker build -f Dockerfile.zeppelin -t alluxio/zeppelin:0.10.0_2.9.0 ./
+#               docker build -f Dockerfile.zeppelin -t alluxio/zeppelin:0.11.0_2.9.0 ./
 #               OR:
-#               docker build --no-cache -f Dockerfile.zeppelin -t alluxio/zeppelin:0.10.0_2.9.0 ./
+#               docker build --no-cache -f Dockerfile.zeppelin -t alluxio/zeppelin:0.11.0_2.9.0 ./
 #
 #        RUN:
 #               When running against a non-HA configured Alluxio cluster, use this command:
@@ -21,7 +21,7 @@
 #                 -e ALLUXIO_MASTER_PORT="19998" \
 #                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
 #                 --name alluxio-zeppelin \
-#                 alluxio/zeppelin:0.10.0_2.9.0
+#                 alluxio/zeppelin:0.11.0_2.9.0
 #
 #               When running against a Raft-based HA configured Alluxio cluster, use this command:
 #
@@ -32,7 +32,7 @@
 #                 -e ALLUXIO_MASTER_EMBEDDED_JOURNAL_ADDRESSES=<master_hostname_1>:19200,<master_hostname_2>:19200,<master_hostname_3>:19200 \
 #                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
 #                 --name alluxio-zeppelin \
-#                 alluxio/zeppelin:0.10.0_2.9.0
+#                 alluxio/zeppelin:0.11.0_2.9.0
 #
 #               When running against a Zookeeper-based HA configured Alluxio cluster, use this command:
 #
@@ -44,12 +44,12 @@
 #                 -e ALLUXIO_ZOOKEEPER_ADDRESS=<zk1_hostname>:2181, <zk2_hostname>=zk1:2181, <zk3_hostname>:2181 \
 #                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
 #                 --name alluxio-zeppelin \
-#                 alluxio/zeppelin:0.10.0_2.9.0
+#                 alluxio/zeppelin:0.11.0_2.9.0
 
 
 FROM maven:3.6.3-jdk-8 as builder
 
-ENV ZEPPELIN_VERSION="0.10.0" \
+ENV ZEPPELIN_VERSION="0.11.0" \
     ZEPPELIN_HOME="/opt/zeppelin" \
     ALLUXIO_VERSION="2.9.0"
 
@@ -58,7 +58,7 @@ ARG ZEPPELIN_SOURCE=/tmp/zeppelin/src
 ARG ZEPPELIN_GIT_URL=https://github.com/apache/zeppelin
 
 # Build Zeppelin with the latest Alluxio version
-RUN git clone --single-branch --branch branch-0.10 https://github.com/apache/zeppelin.git \
+RUN git https://github.com/apache/zeppelin.git \
     && cd zeppelin \
     && sed -i "s/\<alluxio.version\>.*\<\/alluxio.version\>/\<alluxio.version\>${ALLUXIO_VERSION}\<\/alluxio.version\>/" alluxio/pom.xml \
     && echo "unsafe-perm=true" > ~/.npmrc \
@@ -79,7 +79,7 @@ FROM ubuntu:20.04
 
 LABEL maintainer="Greg Palmer <greg.palmer@alluxio.com>"
 
-ENV ZEPPELIN_VERSION="0.10.0"
+ENV ZEPPELIN_VERSION="0.11.0"
 ENV ZEPPELIN_IN_DOCKER="true"
 ENV USE_HADOOP="false"
 
