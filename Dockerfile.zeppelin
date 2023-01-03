@@ -1,0 +1,157 @@
+#
+# FILE:  Dockerfile.zeppelin
+#
+# DESC:  Docker build file to create an Apache Zeppelin docker image that works
+#        with Alluxio 2.9.0
+#
+# USAGE:
+#        BUILD:
+#               docker build -f Dockerfile.zeppelin -t alluxio/zeppelin:0.10.0_2.9.0 ./
+#               OR:
+#               docker build --no-cache -f Dockerfile.zeppelin -t alluxio/zeppelin:0.10.0_2.9.0 ./
+#
+#        RUN:
+#               When running against a non-HA configured Alluxio cluster, use this command:
+#
+#               docker run -p 8080:8080 --rm \
+#                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
+#                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+#                 -e ZEPPELIN_IN_DOCKER=true \
+#                 -e ALLUXIO_MASTER_HOSTNAME="<master_ip_addr>" \
+#                 -e ALLUXIO_MASTER_PORT="19998" \
+#                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
+#                 --name alluxio-zeppelin \
+#                 alluxio/zeppelin:0.10.0_2.9.0
+#
+#               When running against a Raft-based HA configured Alluxio cluster, use this command:
+#
+#               docker run -p 8080:8080 --rm \
+#                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
+#                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+#                 -e ZEPPELIN_IN_DOCKER=true \
+#                 -e ALLUXIO_MASTER_EMBEDDED_JOURNAL_ADDRESSES=<master_hostname_1>:19200,<master_hostname_2>:19200,<master_hostname_3>:19200 \
+#                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
+#                 --name alluxio-zeppelin \
+#                 alluxio/zeppelin:0.10.0_2.9.0
+#
+#               When running against a Zookeeper-based HA configured Alluxio cluster, use this command:
+#
+#               docker run -p 8080:8080 --rm \
+#                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
+#                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+#                 -e ZEPPELIN_IN_DOCKER=true \
+#                 -e ALLUXIO_ZOOKEEPER_ENABLED=true \
+#                 -e ALLUXIO_ZOOKEEPER_ADDRESS=<zk1_hostname>:2181, <zk2_hostname>=zk1:2181, <zk3_hostname>:2181 \
+#                 -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
+#                 --name alluxio-zeppelin \
+#                 alluxio/zeppelin:0.10.0_2.9.0
+
+
+FROM maven:3.6.3-jdk-8 as builder
+
+ENV ZEPPELIN_VERSION="0.10.0" \
+    ZEPPELIN_HOME="/opt/zeppelin" \
+    ALLUXIO_VERSION="2.9.0"
+
+ARG ZEPPELIN_BUILD_NAME='without-hadoop'
+ARG ZEPPELIN_SOURCE=/tmp/zeppelin/src
+ARG ZEPPELIN_GIT_URL=https://github.com/apache/zeppelin
+
+# Build Zeppelin with the latest Alluxio version
+RUN git clone --single-branch --branch branch-0.10 https://github.com/apache/zeppelin.git \
+    && cd zeppelin \
+    && sed -i "s/\<alluxio.version\>.*\<\/alluxio.version\>/\<alluxio.version\>${ALLUXIO_VERSION}\<\/alluxio.version\>/" alluxio/pom.xml \
+    && echo "unsafe-perm=true" > ~/.npmrc \
+    && echo '{ "allow_root": true }' > ~/.bowerrc \
+    && mvn -B clean package -DskipTests -Pbuild-distr -Pspark-3.0 -Pscala-2.12 -Phadoop2 \
+    && mv zeppelin-distribution/target/zeppelin-*/zeppelin-* ${ZEPPELIN_HOME}/ \
+    && cd .. \
+    && rm -rf ~/.m2 \
+    && rm -rf zeppelin \
+    && wget https://downloads.alluxio.io/downloads/files/${ALLUXIO_VERSION}/alluxio-${ALLUXIO_VERSION}-bin.tar.gz \
+    && tar xvfz alluxio-${ALLUXIO_VERSION}-bin.tar.gz \
+    && cp alluxio-${ALLUXIO_VERSION}/assembly/alluxio-client-*.jar ${ZEPPELIN_HOME}/interpreter/alluxio/ \
+    && rm -rf alluxio-${ALLUXIO_VERSION}*
+
+
+
+FROM ubuntu:20.04
+
+LABEL maintainer="Greg Palmer <greg.palmer@alluxio.com>"
+
+ENV ZEPPELIN_VERSION="0.10.0"
+ENV ZEPPELIN_IN_DOCKER="true"
+ENV USE_HADOOP="false"
+
+ENV LOG_TAG="[ZEPPELIN_${ZEPPELIN_VERSION}]:" \
+    ZEPPELIN_HOME="/opt/zeppelin" \
+    HOME="/opt/zeppelin" \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 \
+    ZEPPELIN_ADDR="0.0.0.0"
+
+RUN echo "$LOG_TAG install basic packages" && \
+    apt-get -y update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y locales language-pack-en tini openjdk-8-jre-headless wget unzip && \
+    # Cleanup
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get autoclean && \
+    apt-get clean
+
+# Install conda to manage python and R packages
+ARG miniconda_version="py37_4.9.2"
+#ARG miniconda_version="py37_22.11.1-1"
+# Hashes via https://docs.conda.io/en/latest/miniconda_hashes.html
+ARG miniconda_sha256="79510c6e7bd9e012856e25dcb21b3e093aa4ac8113d9aa7e82a86987eabe1c31"
+#ARG miniconda_sha256="22b14d52265b4e609c6ce78e2f2884b277d976b83b5f9c8a83423e3eba2ccfbe"
+
+# Install python and R packages via conda
+COPY env_python_3_with_R.yml /env_python_3_with_R.yml
+
+RUN set -ex && \
+    wget -nv https://repo.anaconda.com/miniconda/Miniconda3-${miniconda_version}-Linux-x86_64.sh -O miniconda.sh && \
+    echo "${miniconda_sha256} miniconda.sh" > anaconda.sha256 && \
+    sha256sum --strict -c anaconda.sha256 && \
+    bash miniconda.sh -b -p /opt/conda && \
+    export PATH=/opt/conda/bin:$PATH && \
+    conda config --set always_yes yes --set changeps1 no && \
+    conda info -a && \
+    conda install mamba -c conda-forge && \
+    mamba env update -f /env_python_3_with_R.yml --prune && \
+    # Cleanup
+    rm -v miniconda.sh anaconda.sha256  && \
+    # Cleanup based on https://github.com/ContinuumIO/docker-images/commit/cac3352bf21a26fa0b97925b578fb24a0fe8c383
+    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+    mamba clean -ay
+    # Allow to modify conda packages. This allows malicious code to be injected into other interpreter sessions, therefore it is disabled by default
+    # chmod -R ug+rwX /opt/conda
+ENV PATH /opt/conda/envs/python_3_with_R/bin:/opt/conda/bin:$PATH
+
+# Copy the zeppelin build image from above
+COPY --from=builder /opt/zeppelin ${ZEPPELIN_HOME}
+
+RUN echo "$LOG_TAG Installing Zeppelin build" && \
+    chown -R root:root ${ZEPPELIN_HOME}/ && \
+    mkdir -p ${ZEPPELIN_HOME}/logs ${ZEPPELIN_HOME}/run ${ZEPPELIN_HOME}/webapps && \
+    # Allow process to edit /etc/passwd, to create a user entry for zeppelin
+    chgrp root /etc/passwd && chmod ug+rw /etc/passwd && \
+    # Give access to some specific folders
+    chmod -R 775 "${ZEPPELIN_HOME}/logs" "${ZEPPELIN_HOME}/run" "${ZEPPELIN_HOME}/notebook" "${ZEPPELIN_HOME}/conf" && \
+    # Allow process to create new folders (e.g. webapps)
+    chmod 775 ${ZEPPELIN_HOME} && \
+    chmod -R 775 /opt/conda
+
+COPY log4j.properties ${ZEPPELIN_HOME}/conf/
+COPY log4j_docker.properties ${ZEPPELIN_HOME}/conf/
+COPY log4j2.properties ${ZEPPELIN_HOME}/conf/
+COPY log4j2_docker.properties ${ZEPPELIN_HOME}/conf/
+
+USER 1000
+
+EXPOSE 8080
+
+ENTRYPOINT [ "/usr/bin/tini", "--" ]
+WORKDIR ${ZEPPELIN_HOME}
+CMD ["bin/zeppelin.sh"]
