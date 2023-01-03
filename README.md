@@ -77,11 +77,11 @@ Download the Docker build script named Dockerfile.zeppelin from this git repo. E
 
 Run the following Docker build command to build a Zeppelin Docker image that includes the correct integration with Alluxio.
 
-     docker build -f Dockerfile.zeppelin -t alluxio/zeppelin:0.11.0_2.9.0 ./
+     docker build -f Dockerfile.zeppelin -t alluxio/alluxio-zeppelin:2.9.0_0.11.0 ./
 
 If you want to rebuild the image again, without starting from the beginning, you can run the command with the --no-cache option:
 
-     docker build --no-cache -f Dockerfile.zeppelin -t alluxio/zeppelin:0.11.0_2.9.0 ./
+     docker build --no-cache -f Dockerfile.zeppelin -t alluxio/alluxio-zeppelin:2.9.0_0.11.0 ./
      
 ### Step 4. Run the Docker image
 
@@ -99,7 +99,7 @@ When running against a non-HA configured Alluxio cluster, use this command:
                  -e ALLUXIO_MASTER_PORT="19998" \
                  -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
                  --name alluxio-zeppelin \
-                 alluxio/zeppelin:0.11.0_2.9.0
+                 alluxio/alluxio-zeppelin:2.9.0_0.11.0
 
 Note: If you want to reference the Docker host's "localhost" ip address, you can set "<alluxio_master_ip_addr>" to "host.docker.internal".
  
@@ -112,7 +112,7 @@ Note: If you want to reference the Docker host's "localhost" ip address, you can
                  -e ALLUXIO_MASTER_EMBEDDED_JOURNAL_ADDRESSES=<master_hostname_1>:19200,<master_hostname_2>:19200,<master_hostname_3>:19200 \
                  -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
                  --name alluxio-zeppelin \
-                 alluxio/zeppelin:0.11.0_2.9.0
+                 alluxio/alluxio-zeppelin:2.9.0_0.11.0
                  
 When running against a Zookeeper-based HA configured Alluxio cluster, use this command:
 
@@ -124,7 +124,7 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
                  -e ALLUXIO_ZOOKEEPER_ADDRESS=<zk1_hostname>:2181, <zk2_hostname>=zk1:2181, <zk3_hostname>:2181 \
                  -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
                  --name alluxio-zeppelin \
-                 alluxio/zeppelin:0.11.0_2.9.0
+                 alluxio/alluxio-zeppelin:2.9.0_0.11.0
                  
 **Run in a Kubernetes Pod**
 
