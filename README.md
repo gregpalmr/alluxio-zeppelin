@@ -92,20 +92,22 @@ To run the Docker image manually, use the following commands and supply the corr
 When running against a non-HA configured Alluxio cluster, use this command:
 
      docker run -p 8080:8080 --rm \
-                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
-                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+                 -v tmp-zeppelin-logs:/opt/zeppelin/logs \
+                 -v tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
                  -e ZEPPELIN_IN_DOCKER=true \
                  -e ALLUXIO_MASTER_HOSTNAME="<alluxio_master_ip_addr>" \
                  -e ALLUXIO_MASTER_PORT="19998" \
                  -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
                  --name alluxio-zeppelin \
                  alluxio/zeppelin:0.10.0_2.9.0
+
+Note: If you want to reference the Docker host's "localhost" ip address, you can set "<alluxio_master_ip_addr>" to "host.docker.internal".
  
  When running against a Raft-based HA configured Alluxio cluster, use this command:
  
      docker run -p 8080:8080 --rm \
-                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
-                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+                 -v tmp-zeppelin-logs:/opt/zeppelin/logs \
+                 -v tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
                  -e ZEPPELIN_IN_DOCKER=true \
                  -e ALLUXIO_MASTER_EMBEDDED_JOURNAL_ADDRESSES=<master_hostname_1>:19200,<master_hostname_2>:19200,<master_hostname_3>:19200 \
                  -e SPARK_MASTER="spark://<spark_master_ip_addr>:7077" \
@@ -115,8 +117,8 @@ When running against a non-HA configured Alluxio cluster, use this command:
 When running against a Zookeeper-based HA configured Alluxio cluster, use this command:
 
      docker run -p 8080:8080 --rm \
-                 -v $PWD/tmp-zeppelin-logs:/opt/zeppelin/logs \
-                 -v $PWD/tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
+                 -v tmp-zeppelin-logs:/opt/zeppelin/logs \
+                 -v tmp-zeppelin-notebooks:/opt/zeppelin/notebook \
                  -e ZEPPELIN_IN_DOCKER=true \
                  -e ALLUXIO_ZOOKEEPER_ENABLED=true \
                  -e ALLUXIO_ZOOKEEPER_ADDRESS=<zk1_hostname>:2181, <zk2_hostname>=zk1:2181, <zk3_hostname>:2181 \
