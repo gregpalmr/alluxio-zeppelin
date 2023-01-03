@@ -166,7 +166,7 @@ If you want to run the Zeppelin server on Linux, you can build the release using
      
 ### Step 6. Run a stand-alone Linux build
 
-To run the Zeppelin server on Linux, you must first configure the Zeppelin Alluxio interpreter. Modify the interpreter confirmation file using the vi editor:
+To run the Zeppelin server on Linux, you must first configure the Zeppelin Alluxio interpreter. Modify the interpreter configuration file using the vi editor:
      
      vi /opt/zeppelin/interpreter/alluxio/interpreter-setting.json
      
