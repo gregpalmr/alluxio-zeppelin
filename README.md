@@ -128,7 +128,178 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
 
 <TBD>
 
+### Step 5. Build a stand-alone Linux build
+     
+If you want to run the Zeppelin server on Linux, you can build the release using these instructions.
+     
+     ALLUXIO_VERSION="2.9.0"
+     ZEPPELIN_VERSION="0.10.0"
+     ZEPPELIN_HOME="/opt/zeppelin"
+     
+     # Clone the Zeppelin git repo
+     git clone --single-branch --branch branch-0.10 https://github.com/apache/zeppelin.git
+     cd zeppelin
+     
+     # Change the Alluxio POM file to use the specified version of Alluxio source
+     sed -i "s/<alluxio.version>.*<\/alluxio.version>/<alluxio.version>${ALLUXIO_VERSION}<\/alluxio.version\>/" alluxio/pom.xml
+     
+     # Configure NPM and Bower
+     echo "unsafe-perm=true" > ~/.npmrc 
+     echo '{ "allow_root": true }' > ~/.bowerrc
+     
+     # Build the Zeppelin server from source
+     mvn -B clean package -DskipTests -Pbuild-distr -Pspark-3.0 -Pscala-2.12 -Phadoop2
+     
+     # Move the distro artifacts to /opt/zeppelin
+     mv zeppelin-distribution/target/zeppelin-*/zeppelin-* ${ZEPPELIN_HOME}/ 
+     
+     # Fetch the Alluxio assembly jar file required by the Zeppelin Alluxuio interpreter
+     wget https://downloads.alluxio.io/downloads/files/${ALLUXIO_VERSION}/alluxio-${ALLUXIO_VERSION}-bin.tar.gz 
+     tar xvfz alluxio-${ALLUXIO_VERSION}-bin.tar.gz 
+     cp alluxio-${ALLUXIO_VERSION}/assembly/alluxio-client-*.jar ${ZEPPELIN_HOME}/interpreter/alluxio/ 
+     
+     # Clean up the build environment
+     cd .. 
+     rm -rf ~/.m2 
+     rm -rf zeppelin 
+     rm -rf alluxio-${ALLUXIO_VERSION}*
+     
+### Step 6. Run a stand-alone Linux build
+
+To run the Zeppelin server on Linux, you must first configure the Zeppelin Alluxio interpreter. Modify the interpreter confirmation file using the vi editor:
+     
+     vi /opt/zeppelin/interpreter/alluxio/interpreter-setting.json
+     
+If you are running with a single Alluxio master node, change the contents to point to your Alluxio master node, like this:
+     
+     [
+       {
+         "group": "alluxio",
+         "name": "alluxio",
+         "className": "org.apache.zeppelin.alluxio.AlluxioInterpreter",
+         "properties": {
+           "alluxio.master.hostname": {
+             "envName": "ALLUXIO_MASTER_HOSTNAME",
+             "propertyName": "alluxio.master.hostname",
+             "defaultValue": "<my_alluxio_master_server_ hostname>",
+             "description": "Alluxio non-HA - master hostname",
+             "type": "string"
+           },
+           "alluxio.master.port": {
+             "envName": "ALLUXIO_MASTER_PORT",
+             "propertyName": "alluxio.master.port",
+             "defaultValue": "19998",
+             "description": "Alluxio non-HA - master port",
+             "type": "number"
+           }
+         },
+         "editor": {
+           "editOnDblClick": false,
+           "completionSupport": true
+         }
+       }
+     ]
+
+If you are running Alluxio in HA mode, using the built-in Raft service, you can configure the Alluxio interpreter like this:
+     
+     [
+       {
+         "group": "alluxio",
+         "name": "alluxio",
+         "className": "org.apache.zeppelin.alluxio.AlluxioInterpreter",
+         "properties": {
+           "alluxio.master.hostname": {
+             "envName": "ALLUXIO_MASTER_EMBEDDED_JOURNAL_ADDRESSES",
+             "propertyName": "alluxio.master.embedded.journal.address",
+             "defaultValue": "<master_hostname_1>:19200,<master_hostname_2>:19200,<master_hostname_3>:19200",
+             "description": "Alluxio HA - Alluxio hostnames and ports",
+             "type": "string"
+           },
+         "editor": {
+           "editOnDblClick": false,
+           "completionSupport": true
+         }
+       }
+     ]
+
+If you are running Alluxio in HA mode, using the Zookeeper service, you can configure the Alluxio interpreter like this:
+     
+     [
+       {
+         "group": "alluxio",
+         "name": "alluxio",
+         "className": "org.apache.zeppelin.alluxio.AlluxioInterpreter",
+         "properties": {
+           "alluxio.master.hostname": {
+             "envName": "ALLUXIO_ZOOKEEPER_ENABLED",
+             "propertyName": "alluxio.zookeeper.enabled",
+             "defaultValue": "true",
+             "description": "Alluxio master hostname",
+             "type": "string"
+           },
+           "alluxio.master.hostname": {
+             "envName": "ALLUXIO_ZOOKEEPER_ADDRESS",
+             "propertyName": "alluxio.zookeeper.address",
+             "defaultValue": "<zk1_hostname>:2181, <zk2_hostname>=zk1:2181, <zk3_hostname>:2181",
+             "description": "Alluxio HA - Zookeeper hostnames and ports",
+             "type": "string"
+           },
+         "editor": {
+           "editOnDblClick": false,
+           "completionSupport": true
+         }
+       }
+     ]
+     
+With the Alluxio interpreter configured, you can start the Zeppelin server using the supplied start up script:
+     
+     export USE_HADOOP=false
+     /opt/zeppelin/bin/zeppelin-daemon.sh start
+     
+Later, you can stop the Zeppelin server using the command:
+     
+     /opt/zeppelin/bin/zeppelin-daemon.sh stop
+
+### Step 7. Use the Zeppelin Alluxio interpreter
+
+To use the Zeppelin Alluxi interpreter, start a new Zeppelin notebook session by pointing your Web browser to the Zeppelin server, like this:
+     
+     http://<zeppelin_server_address>8080
+
+Then, create a new notebook and use the Alluxio interpreter by running the following paragraphs:
+
+     %alluxio
+     help
+     Commands list:
+	[help] - List all available commands.
+	[cat <path>] - Prints the file's contents to the console.
+	[chgrp [-R] <group> <path>] - Changes the group of a file or directory specified by args. Specify -R to change the group recursively.
+	[chmod -R <mode> <path>] - Changes the permission of a file or directory specified by args. Specify -R to change the permission recursively.
+	[chown -R <owner> <path>] - Changes the owner of a file or directory specified by args. Specify -R to change the owner recursively.
+	[copyFromLocal <src> <remoteDst>] - Copies a file or a directory from local filesystem to Alluxio filesystem.
+	[copyToLocal <src> <localDst>] - Copies a file or a directory from the Alluxio filesystem to the local filesystem.
+	[count <path>] - Displays the number of files and directories matching the specified prefix.
+	[createLineage <inputFile1,...> <outputFile1,...> [<cmd_arg1> <cmd_arg2> ...]] - Creates a lineage.
+	[deleteLineage <lineageId> <cascade(true|false)>] - Deletes a lineage. If cascade is specified as true, dependent lineages will also be deleted.
+	[du <path>] - Displays the size of the specified file or directory.
+	[fileInfo <path>] - Displays all block info for the specified file.
+	[free <file path|folder path>] - Removes the file or directory(recursively) from Alluxio memory space.
+	[getCapacityBytes] - Gets the capacity of the Alluxio file system.
+	[getUsedBytes] - Gets number of bytes used in the Alluxio file system.
+	[listLineages] - Lists all lineages.
+	[load <path>] - Loads a file or directory in Alluxio space, makes it resident in memory.
+	[loadMetadata <path>] - Loads metadata for the given Alluxio path from the under file system.
+	[location <path>] - Displays the list of hosts storing the specified file.
+	[ls [-R] <path>] - Displays information for all files and directories directly under the specified path. Specify -R to display files and directories recursively.
+     ...
+
+     %alluxio
+     ls /   
+     /tmp
+     /user
+     ...
+     
 ### Summary
 
-This git repo provided instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com
+This git repo provides instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com
 
