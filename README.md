@@ -85,7 +85,7 @@ If you want to rebuild the image again, without starting from the beginning, you
      
 ### Step 4. Run the Docker image
 
-Docker Run
+**Run Manually**
 
 To run the Docker image manually, use the following commands and supply the correct hostname or IP address of the Alluxio master node(s).
 
@@ -124,7 +124,11 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
                  --name alluxio-zeppelin \
                  alluxio/zeppelin:0.10.0_2.9.0
                  
-Kubernetes Pod
+**Run in a Kubernetes Pod**
 
-TBD
+<TBD>
+
+### Summary
+
+This git repo provided instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com
 
