@@ -55,7 +55,7 @@ For more information about he Zeppelin Alluxio interpreter, see:
      
 ## Build a Docker image
 
-If you want to run the Zeppelin server in a Docker container or in a Kubernetes Pod, you can build the Docker image file using the following instructions.
+If you want to run the Zeppelin server in a Docker container or in a Kubernetes pod, you can build the Docker image file using the following instructions.
 
 ### Step 1. Make sure you have Docker desktop installed and configured.
 
@@ -126,7 +126,7 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
                  
 **Run in a Kubernetes Pod**
 
-<TBD>
+TBD
 
 ### Step 5. Build a stand-alone Linux build
      
