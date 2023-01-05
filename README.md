@@ -139,7 +139,7 @@ If you want to run the Zeppelin server on Linux, you can build the release using
      ZEPPELIN_HOME="/opt/zeppelin"
      
      # Clone the Zeppelin git repo
-     git clone https://github.com/apache/zeppelin.git
+     git clone https://github.com/gregpalmr/zeppelin
      cd zeppelin
      
      # Change the Alluxio POM file to use the specified version of Alluxio source
