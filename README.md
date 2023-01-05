@@ -52,6 +52,16 @@ The Alluxio interpreter that is bundled with the Zeppelin server allows users to
 For more information about he Zeppelin Alluxio interpreter, see:
 
 - https://zeppelin.apache.org/docs/0.10.0/interpreter/alluxio.html
+
+## Clone this git repository
+
+If you have the git utility installed on your computer, you can clone this git repo using the following commands:
+
+     git clone https://github.com/gregpalmr/alluxio-zeppelin
+
+     cd alluxio-zeppelin
+
+If you don't have the git utility, you can download the repo as a ZIP file and extract the contents to a directory on your computer. Point your web browser to https://github.com/gregpalmr/alluxio-zeppelin and click on the green "Code" button and then select the "Download ZIP" link.
      
 ## Build a Docker image
 
@@ -65,15 +75,7 @@ If you want to run the Zeppelin server in a Docker container or in a Kubernetes 
 
 - For Linux computers, follow the instructions here: https://docs.docker.com/desktop/install/linux-install/
 
-### Step 2. Download the Docker build (Dockerfile) script
-
-Download the Docker build script named Dockerfile.zeppelin from this git repo. Either copy and paste the contents into a file on your computer, or use the following WGET or CURL command:
-
-     wget https://raw.githubusercontent.com/gregpalmr/alluxio-zeppelin/main/Dockerfile.zeppelin
-     
-     curl -O https://raw.githubusercontent.com/gregpalmr/alluxio-zeppelin/main/Dockerfile.zeppelin
-     
-### Step 3. Build the Docker image
+### Step 2. Build the Docker image
 
 Run the following Docker build command to build a Zeppelin Docker image that includes the correct integration with Alluxio.
 
@@ -83,7 +85,7 @@ If you want to rebuild the image again, without starting from the beginning, you
 
      docker build --no-cache -f Dockerfile.zeppelin -t alluxio/alluxio-zeppelin:2.9.0_0.11.0 ./
      
-### Step 4. Run the Docker image
+### Step 3. Run the Docker image
 
 **Run Manually**
 
@@ -130,7 +132,7 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
 
 TBD
 
-### Step 5. Build a stand-alone Linux build
+### Step 4. Build a stand-alone Linux build
      
 If you want to run the Zeppelin server on Linux, you can build the release using these instructions.
      
@@ -166,7 +168,7 @@ If you want to run the Zeppelin server on Linux, you can build the release using
      rm -rf zeppelin 
      rm -rf alluxio-${ALLUXIO_VERSION}*
      
-### Step 6. Run a stand-alone Linux build
+### Step 5. Run a stand-alone Linux build
 
 To run the Zeppelin server on Linux, you must first configure the Zeppelin Alluxio interpreter. Modify the interpreter configuration file using the vi editor:
      
@@ -262,7 +264,7 @@ Later, you can stop the Zeppelin server using the command:
      
      /opt/zeppelin/bin/zeppelin-daemon.sh stop
 
-### Step 7. Use the Zeppelin Alluxio interpreter
+## Using the Zeppelin Alluxio interpreter
 
 To use the Zeppelin Alluxi interpreter, start a new Zeppelin notebook session by pointing your Web browser to the Zeppelin server, like this:
      
