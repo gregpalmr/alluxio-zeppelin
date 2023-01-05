@@ -107,7 +107,7 @@ ARG miniconda_sha256="79510c6e7bd9e012856e25dcb21b3e093aa4ac8113d9aa7e82a86987ea
 #ARG miniconda_sha256="22b14d52265b4e609c6ce78e2f2884b277d976b83b5f9c8a83423e3eba2ccfbe"
 
 # Install python and R packages via conda
-COPY env_python_3_with_R.yml /env_python_3_with_R.yml
+COPY conf/env_python_3_with_R.yml /tmp/env_python_3_with_R.yml
 
 RUN set -ex && \
     wget -nv https://repo.anaconda.com/miniconda/Miniconda3-${miniconda_version}-Linux-x86_64.sh -O miniconda.sh && \
@@ -118,15 +118,17 @@ RUN set -ex && \
     conda config --set always_yes yes --set changeps1 no && \
     conda info -a && \
     conda install mamba -c conda-forge && \
-    mamba env update -f /env_python_3_with_R.yml --prune && \
+    mamba env update -f /tmp/env_python_3_with_R.yml --prune && \
     # Cleanup
     rm -v miniconda.sh anaconda.sha256  && \
     # Cleanup based on https://github.com/ContinuumIO/docker-images/commit/cac3352bf21a26fa0b97925b578fb24a0fe8c383
     find /opt/conda/ -follow -type f -name '*.a' -delete && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    mamba clean -ay
+    mamba clean -ay && \
+    rm /tmp/env_python_3_with_R.yml
     # Allow to modify conda packages. This allows malicious code to be injected into other interpreter sessions, therefore it is disabled by default
     # chmod -R ug+rwX /opt/conda
+    
 ENV PATH /opt/conda/envs/python_3_with_R/bin:/opt/conda/bin:$PATH
 
 # Copy the zeppelin build image from above
@@ -143,10 +145,8 @@ RUN echo "$LOG_TAG Installing Zeppelin build" && \
     chmod 775 ${ZEPPELIN_HOME} && \
     chmod -R 775 /opt/conda
 
-COPY log4j.properties ${ZEPPELIN_HOME}/conf/
-COPY log4j_docker.properties ${ZEPPELIN_HOME}/conf/
-COPY log4j2.properties ${ZEPPELIN_HOME}/conf/
-COPY log4j2_docker.properties ${ZEPPELIN_HOME}/conf/
+# Copy the log4j conf files
+COPY conf/ ${ZEPPELIN_HOME}/conf/
 
 USER 1000
 
