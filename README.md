@@ -132,9 +132,13 @@ When running against a Zookeeper-based HA configured Alluxio cluster, use this c
 
 TBD
 
-### Step 4. Build a stand-alone Linux build
-     
+## Build a stand-alone Linux build
+
 If you want to run the Zeppelin server on Linux, you can build the release using these instructions.
+     
+### Step 1. Build the Zeppelin package
+
+Use the following commands to build the source using maven 3.6.3 or higher and JDK 1.8_151 or higher.
      
      ALLUXIO_VERSION="2.9.0"
      ZEPPELIN_VERSION="0.11.0"
@@ -159,7 +163,7 @@ If you want to run the Zeppelin server on Linux, you can build the release using
      
      # Fetch the Alluxio assembly jar file required by the Zeppelin Alluxuio interpreter
      wget https://downloads.alluxio.io/downloads/files/${ALLUXIO_VERSION}/alluxio-${ALLUXIO_VERSION}-bin.tar.gz 
-     tar xvfz alluxio-${ALLUXIO_VERSION}-bin.tar.gz 
+     tar xzf alluxio-${ALLUXIO_VERSION}-bin.tar.gz 
      cp alluxio-${ALLUXIO_VERSION}/assembly/alluxio-client-*.jar ${ZEPPELIN_HOME}/interpreter/alluxio/ 
      
      # Clean up the build environment
@@ -168,7 +172,7 @@ If you want to run the Zeppelin server on Linux, you can build the release using
      rm -rf zeppelin 
      rm -rf alluxio-${ALLUXIO_VERSION}*
      
-### Step 5. Run a stand-alone Linux build
+### Step 2. Run a stand-alone Linux build
 
 To run the Zeppelin server on Linux, you must first configure the Zeppelin Alluxio interpreter. Modify the interpreter configuration file using the vi editor:
      
@@ -306,4 +310,5 @@ Then, create a new notebook and use the Alluxio interpreter by running the follo
 ### Summary
 
 This git repo provides instructions for building an Apache Zeppelin server that integrates with Alluxio 2.9.0. If you have any questions or comments, please send them to greg.palmer@alluxio.com 
+
 
