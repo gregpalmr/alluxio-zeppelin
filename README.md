@@ -103,9 +103,12 @@ When running against a non-HA configured Alluxio cluster, use this command:
                  --name alluxio-zeppelin \
                  alluxio/alluxio-zeppelin:2.9.0_0.11.0
 
-Note: If you want to reference the Docker host's "localhost" ip address, you can set "<alluxio_master_ip_addr>" to "host.docker.internal".
+NOTE: If you want to reference the Docker host's "localhost" ip address, you can replace "<alluxio_master_ip_addr>" with:
+
+- On Windows or MacOS: host.docker.internal
+- On Linux: 172.17.0.1
  
- When running against a Raft-based HA configured Alluxio cluster, use this command:
+When running against a Raft-based HA configured Alluxio cluster, use this command:
  
      docker run -p 8080:8080 --rm \
                  -v tmp-zeppelin-logs:/opt/zeppelin/logs \
