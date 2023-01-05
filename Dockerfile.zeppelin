@@ -58,7 +58,7 @@ ARG ZEPPELIN_SOURCE=/tmp/zeppelin/src
 ARG ZEPPELIN_GIT_URL=https://github.com/apache/zeppelin
 
 # Build Zeppelin with the latest Alluxio version
-RUN git https://github.com/apache/zeppelin.git \
+RUN git clone https://github.com/gregpalmr/zeppelin \
     && cd zeppelin \
     && sed -i "s/\<alluxio.version\>.*\<\/alluxio.version\>/\<alluxio.version\>${ALLUXIO_VERSION}\<\/alluxio.version\>/" alluxio/pom.xml \
     && echo "unsafe-perm=true" > ~/.npmrc \
